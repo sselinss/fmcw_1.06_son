@@ -1,0 +1,30 @@
+sdr:
+  pluto_uri: "usb:"              # Pluto USB (Pi'ye doğrudan bağlı)
+  sample_rate: 20000000          # 20 MSPS (USB 2.0 tavani, referans deger)
+  center_freq: 5800000000        # 5.8 GHz
+  rx_gain: 30                    # dB (manual) — referans 5.8 GHz profili
+  tx_gain: -10                   # dB attenuation (0 = max TX power)
+
+chirp:
+  bandwidth: 18000000            # 18 MHz (faz tabanli tespit, kaba menzil yeterli)
+  duration: 0.001                # 1 ms chirp
+  n_chirps: 128                  # chirps per CPI (coherent processing interval)
+
+dsp:
+  range_fft_size: 2048
+  doppler_fft_size: 128
+  window: hann
+  min_range_m: 0.3
+  max_range_m: 10.0
+  cfar:
+    guard_cells: 2
+    training_cells: 8
+    false_alarm_rate: 0.001
+  vital_signs:
+    breathing_band_hz: [0.1, 0.5]
+    heartbeat_band_hz: [0.8, 2.0]
+
+display:
+  rpi4_ip: "192.168.1.19"
+  rpi4_port: 5005
+  send_interval_s: 0.5           # RPi4'e kaç saniyede bir sonuç gönder
