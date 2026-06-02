@@ -9,12 +9,12 @@ _DEFAULT = {
     "sdr": {
         "pluto_uri":   "ip:192.168.2.1",
         "sample_rate": 20_000_000,
-        "center_freq": 5_800_000_000,
+        "center_freq": 1_500_000_000,
         "rx_gain":     40,
         "tx_gain":     -10,
     },
     "chirp": {
-        "bandwidth":  15_000_000,
+        "bandwidth":  18_000_000,
         "duration":   1e-3,
         "n_chirps":   128,
     },
@@ -35,7 +35,7 @@ _DEFAULT = {
         },
     },
     "display": {
-        "rpi4_ip":        "192.168.1.100",
+        "rpi4_ip":        "192.168.1.19",
         "rpi4_port":      5005,
         "send_interval_s": 0.5,
     },
