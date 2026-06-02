@@ -34,7 +34,7 @@ PHASE_MOTION_GAIN  = 20.0
 IGNORE_NEAR_M      = 0.0     # bin 0 dahil — TX kacagi baseline ile cikarilir
 RANGE_MAX_M        = 3.0     # Pluto + UWB icin gercekci insan menzili
 VITAL_WINDOW_S     = 20.0
-
+LOCK_RELEASE_FRAMES = 30     # bu kadar kare tespit yoksa hedef kilidini birak
 
 def phase_motion_score(ranges_m, cur, prev):
     """Kareler arasi kompleks degisimden hareket skoru (dB-benzeri)."""
@@ -97,6 +97,10 @@ def main():
     heartbeat_bpm = 0.0
     t0 = time.monotonic()
 
+       # >>> DEGISIKLIK 1: hedef bin kilidi <<<
+    locked_bin    = -1          # vital signs icin kilitlenen SABIT hucre
+    no_target_cnt = 0           # kac karedir tespit yok
+
     try:
         while True:
             frame = radar.capture_frame()
@@ -125,9 +129,25 @@ def main():
 
             score = max(mag_score, ph_score)
 
+
+          # >>> DEGISIKLIK 2: hedef bin'ine kilitlen (vital signs icin sabit hucre) <<<
+            if score >= MIN_MOTION_DB and best_bin >= 0:
+                no_target_cnt = 0
+                if locked_bin < 0:
+                    locked_bin = best_bin            # ilk tespitte kilitle
+                elif abs(best_bin - locked_bin) <= 1:
+                    locked_bin = best_bin            # komsu hucreye kucuk kaymayi kabul et
+                # uzaktaki ani argmax sicramalari yok sayilir -> locked_bin sabit kalir
+            else:
+                no_target_cnt += 1
+                if no_target_cnt > LOCK_RELEASE_FRAMES:   # uzun sure tespit yoksa kilidi birak
+                    locked_bin = -1
+
+                    
+
             # ── Vital signs birikimi (en guclu sinyal bin'i) ──────────────
-            if best_bin >= 0:
-                vital_buf.append((now, complex_row[best_bin]))
+            if locked_bin >= 0:
+                vital_buf.append((now, complex_row[locked_bin]))
             # pencereyi kirp
             while vital_buf and (now - vital_buf[0][0]) > VITAL_WINDOW_S:
                 vital_buf.popleft()
