@@ -223,29 +223,25 @@ def vital_signs(
     config: dict,
     chirp_rate_hz: float,
 ) -> dict:
-    """
-    Slow-time fazından nefes ve kalp hızı tahmini.
-
-    Parameters
-    ----------
-    phase         : (n_chirps,) unwrapped phase
-    config        : radar config
-    chirp_rate_hz : chirp tekrarlama frekansı = 1 / chirp_duration
-
-    Returns
-    -------
-    dict: {"breathing_bpm": float, "heartbeat_bpm": float}
-    """
     vs = config["dsp"]["vital_signs"]
     br_band = vs["breathing_band_hz"]
     hr_band = vs["heartbeat_band_hz"]
-    fs = chirp_rate_hz
+    fs  = chirp_rate_hz
+    nyq = fs / 2.0          # olcebilecegimiz en yuksek frekans
 
-    br_sig = _bandpass(phase, fs, br_band[0], br_band[1])
-    hr_sig = _bandpass(phase, fs, hr_band[0], hr_band[1])
+    # Nefes: band ust siniri Nyquist'in guvenli altindaysa olc, degilse 0
+    if br_band[1] < 0.95 * nyq:
+        br_sig = _bandpass(phase, fs, br_band[0], br_band[1])
+        br_hz  = estimate_rate_hz(br_sig, fs, br_band)
+    else:
+        br_hz = 0.0
 
-    br_hz = estimate_rate_hz(br_sig, fs, br_band)
-    hr_hz = estimate_rate_hz(hr_sig, fs, hr_band)
+    # Kalp: kare hizi yeterli degilse olcme (cokme onlenir)
+    if hr_band[1] < 0.95 * nyq:
+        hr_sig = _bandpass(phase, fs, hr_band[0], hr_band[1])
+        hr_hz  = estimate_rate_hz(hr_sig, fs, hr_band)
+    else:
+        hr_hz = 0.0
 
     return {
         "breathing_bpm":  round(br_hz * 60, 1),
