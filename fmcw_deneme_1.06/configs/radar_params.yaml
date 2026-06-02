@@ -1,7 +1,7 @@
 sdr:
   pluto_uri: "usb:"              # Pluto USB (Pi'ye doğrudan bağlı)
   sample_rate: 20000000          # 20 MSPS (USB 2.0 tavani, referans deger)
-  center_freq: 5800000000        # 5.8 GHz
+  center_freq: 1500000000        # 5.8 GHz di 1.5GHz yaptık
   rx_gain: 30                    # dB (manual) — referans 5.8 GHz profili
   tx_gain: -10                   # dB attenuation (0 = max TX power)
 
